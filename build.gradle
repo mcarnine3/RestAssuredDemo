@@ -1,0 +1,67 @@
+plugins {
+    id 'idea'
+    id 'groovy'
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group 'carnine.test'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "org.codehaus.groovy:groovy-all:3.0.2"
+    testImplementation "io.rest-assured:rest-assured:4.5.1"
+    testImplementation "io.rest-assured:json-schema-validator:4.5.1"
+    testCompileOnly "org.testng:testng:7.3.0"
+    testImplementation "io.qameta.allure:allure-testng:2.20.1"
+    testImplementation "org.slf4j:slf4j-simple:1.7.36"
+    testImplementation "com.github.automatedowl:allure-environment-writer:1.0.0"
+}
+
+task moveCategories(type: Copy) {
+    from "src/test/resources/categories.json"
+    into "build/allure-results/"
+}
+
+test {
+    //disabling this because it breaks the report with github actions
+    //finalizedBy moveCategories
+
+    if (System.getProperty("tags") != null) {
+        systemProperty("tags", System.getProperty("tags"))
+    }
+    if (System.getProperty("env") != null) {
+        systemProperty("env", System.getProperty("env"))
+    }
+    if (System.getProperty("mode") != null) {
+        systemProperty("mode", System.getProperty("mode"))
+    }
+    if (System.getProperty("testRunID") != null) {
+        systemProperty("testRunID", System.getProperty("testRunID"))
+    }
+    if (System.getProperty("jenkinsLink") != null) {
+        systemProperty("jenkinsLink", System.getProperty("jenkinsLink"))
+    }
+
+    useTestNG() {
+        suiteName = "Test Suite"
+        testLogging.showStandardStreams = true
+        useDefaultListeners = true
+        reports.html.required = false
+        parallel = "tests"
+        if (System.getProperty("tags") != null) {
+            includeGroups System.getProperty("tags")
+        }
+    }
+
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+
+}
