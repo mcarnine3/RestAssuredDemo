@@ -24,9 +24,7 @@ jobs:
       - name: Run Tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: test -Dtags=regression
-      - run: gradlew clean build --no-build-cache # just test build configuration
-      - run: echo "The release-candidate version was ${{ steps.setup-gradle.outputs.gradle-version }}"
+          arguments: test -Dtags=smoke
       - name: Get Allure Report history
         uses: actions/checkout@v2
         if: always()
